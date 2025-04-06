@@ -1,0 +1,112 @@
+/* Styles généraux */
+.user-shop {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+}
+
+/* Titre principal */
+.user-shop h2 {
+  text-align: center;
+  color: #333;
+  font-size: 1.8em;
+  margin-bottom: 20px;
+}
+
+/* Formulaire pour ajouter un produit */
+.add-product {
+  margin-bottom: 30px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #ffffff;
+}
+
+.add-product input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+.add-product button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.2em;
+  cursor: pointer;
+}
+
+.add-product button:hover {
+  background-color: #218838;
+}
+
+/* Liste des produits */
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.product-item {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #ffffff;
+  padding: 15px;
+  text-align: center;
+}
+
+.product-item img {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.product-item h3 {
+  color: #333;
+  font-size: 1.2em;
+  margin: 10px 0;
+}
+
+.product-item p {
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.product-item button {
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+.product-item button:hover {
+  background-color: #0056b3;
+}
+
+/* Pied de page */
+.footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.9em;
+  color: #777;
+}
+.product-image {
+  width: 100%;
+  height: auto;
+  max-height: 200px; /* Ajustez la hauteur si nécessaire */
+  object-fit: cover;
+}

@@ -1,0 +1,100 @@
+/* Conteneur principal */
+.profile-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-family: Arial, sans-serif;
+}
+
+/* Titre principal */
+.profile-container h1 {
+  text-align: center;
+  color: #333;
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+/* Conteneur pour la photo de profil et les détails utilisateur */
+.profile-picture-container {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.profile-picture-container .profile-picture {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.profile-picture-container p {
+  color: #555;
+  font-size: 1em;
+  margin: 5px 0;
+}
+
+/* Boutons vers Mur et Boutique */
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 1em;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  background-color: #007bff;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #0056b3;
+}
+
+/* Section Mes Œuvres */
+.user-works {
+  margin-top: 30px;
+}
+
+.user-works h2 {
+  text-align: center;
+  color: #333;
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+.user-works p {
+  text-align: center;
+  color: #555;
+}
+
+.works-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.work-item {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #ffffff;
+  overflow: hidden;
+  text-align: center;
+}
+
+.work-item img {
+  width: 100%;
+  border-bottom: 1px solid #ddd;
+}
+
+.work-item p {
+  padding: 10px;
+  color: #333;
+  font-size: 1em;
+  margin: 0;
+}
+

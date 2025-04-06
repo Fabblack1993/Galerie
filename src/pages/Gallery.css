@@ -1,0 +1,102 @@
+/* Styles de base pour la galerie */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+  }
+  
+  .card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .card:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .card-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .card-text {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .btn {
+    border-radius: 20px;
+  }
+  
+  .btn-primary {
+    background-color: #3498db;
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background-color: #2980b9;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .pagination button {
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    transition: background-color 0.3s;
+  }
+  
+  .pagination button:hover {
+    background-color: #2980b9;
+  }
+  
+  .social-share {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .social-share a {
+    text-decoration: none;
+    color: #fff;
+    background-color: #3498db;
+    border-radius: 50%;
+    padding: 10px;
+    font-size: 18px;
+  }
+  
+  .social-share a:hover {
+    background-color: #2980b9;
+  }
+  input:focus,
+select:focus,
+textarea:focus {
+  outline: none; /* Supprime l'effet de contour par défaut */
+  box-shadow: none; /* Supprime l'ombre générée */
+  border: 1px solid #ccc; /* Ajoute une bordure subtile et élégante */
+}
+
+/* Style de base pour les champs */
+input,
+select,
+textarea {
+  border: 1px solid #ccc; /* Bordure légère */
+  border-radius: 5px; /* Coins légèrement arrondis */
+  padding: 10px; /* Espacement intérieur confortable */
+  font-size: 16px; /* Texte élégant */
+  background-color: #f8f9fa; /* Couleur douce pour le fond */
+  transition: border-color 0.3s ease; /* Transition fluide */
+  outline: none;
+}

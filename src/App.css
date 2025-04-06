@@ -1,0 +1,265 @@
+body {
+  font-family: "Poppins", sans-serif;
+}
+
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+/* Style pour les boutons rectangulaires */
+.navbar .btn {
+  font-size: 14px; /* Taille du texte réduite */
+  padding: 8px 16px; /* Espacement confortable */
+  border-radius: 0; /* Retire les coins arrondis */
+  background-color: #007bff; /* Couleur principale */
+  color: white; /* Couleur du texte */
+  border: none; /* Supprime les bordures */
+  transition: background-color 0.3s ease, transform 0.3s ease; /* Transition fluide */
+}
+
+.navbar .btn:hover {
+  background-color: #0056b3; /* Couleur légèrement plus foncée au survol */
+  transform: scale(1.05); /* Effet subtil au survol */
+}
+
+/* Style pour les boutons */
+/* Style des champs input et select sans bord bleu */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none; /* Supprime l'effet de contour par défaut */
+  box-shadow: none; /* Supprime l'ombre générée */
+  border: 1px solid #ccc; /* Ajoute une bordure subtile et élégante */
+}
+
+/* Style de base pour les champs */
+input,
+select,
+textarea {
+  border: 1px solid #ccc; /* Bordure légère */
+  border-radius: 5px; /* Coins légèrement arrondis */
+  padding: 10px; /* Espacement intérieur confortable */
+  font-size: 16px; /* Texte élégant */
+  background-color: #f8f9fa; /* Couleur douce pour le fond */
+  transition: border-color 0.3s ease; /* Transition fluide */
+}
+
+/* Réduction de la taille du bouton dans la Navbar */
+
+
+/* Focus adouci (si tu veux un effet subtil) */
+input:focus,
+select:focus,
+textarea:focus {
+  border: 1px solid #ccc; /* Bordure légère au focus */
+  background-color: #ffffff; /* Fond légèrement éclairci */
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+  transition: 0.3s ease-in-out;
+}
+
+nav {
+  position: fixed;
+  width: 100%;
+  z-index: 1000;
+}
+
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 1s forwards;
+}
+
+.gallery-item img {
+  transition: transform 0.3s ease;
+}
+
+.gallery-item img:hover {
+  transform: scale(1.05);
+}
+
+.parallax {
+  background-image: url('./assets/423702.webp');
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.img-fluid {
+  width: 150px;
+  height: 150px;
+  object-fit: cover; /* Ajuste l'image pour remplir sans déformation */
+  border-radius: 10px; /* Ajoute des coins arrondis pour un effet moderne */
+}
+
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
+
+img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover; /* Remplit l'image sans la déformer */
+  border-radius: 10px; /* Ajoute des coins arrondis */
+}
+
+.image-container {
+  width: 150px;
+  height: 150px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.col-md-4 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px; /* Ajoute un espacement constant entre l'image et le texte */
+}
+
+.image-container {
+  width: 150px;
+  height: 150px;
+  overflow: hidden;
+  border-radius: 10px; /* Coins légèrement arrondis */
+  margin: 0 auto; /* Centre les images */
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Assure un remplissage sans déformation */
+}
+
+.text-gray-600 {
+  color: #6b7280; /* Ajoute une teinte subtile aux descriptions */
+  font-size: 14px;
+}
+
+/* Styles par défaut (mode clair) */
+.app-container {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.settings-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #ddd;
+}
+
+.settings-bar .btn,
+.settings-bar .form-select {
+  margin-right: 10px;
+}
+
+/* Mode sombre */
+.dark-mode {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+.dark-mode .settings-bar {
+  background-color: #1e1e1e;
+  border-bottom: 1px solid #ffffff;
+}
+
+.dark-mode .btn {
+  background-color: #333;
+  color: #fff;
+  border: none;
+}
+
+.dark-mode .form-select {
+  background-color: #333;
+  color: #fff;
+}
+
+footer {
+  background-color: #222;
+  color: #fff;
+  text-align: center;
+  padding: 20px 0;
+}
+
+footer button {
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+footer button:hover {
+  background-color: #f8f9fa;
+  color: #000;
+  transform: scale(1.05);
+}
+
+form {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+form .form-group {
+  margin-bottom: 15px;
+}
+
+form button {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+}
+
+@keyframes fadeIn {
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
