@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+
 import "./Gallery.css";
 
 
@@ -16,6 +17,7 @@ const Gallery = ({ language }) => {
   const [searchQuery, setSearchQuery] = useState(""); // Recherche
   const [sortOption, setSortOption] = useState("date"); // Tri par défaut
   const [newComments, setNewComments] = useState({});
+  const [replyTo, setReplyTo] = useState(null);
 
   
 
@@ -94,8 +96,10 @@ const shareOnTwitter = (workId) => {
           ...prevComments,
           [workId]: data.comments,
         }));
-      });
+      })
+      .catch((error) => console.error("Erreur lors de la récupération des commentaires :", error));
   };
+  
 
   const fetchLikes = (workId) => {
     fetch(`http://localhost:5000/api/get-likes/${workId}`)
@@ -118,7 +122,8 @@ const shareOnTwitter = (workId) => {
     });
   };
   const handleComment = (workId, commentText, parentId = null) => {
-    if (!commentText || !workId) return; // Vérifie que le commentaire et l'œuvre existent
+    if (!commentText || !workId) return; // Vérifier que le texte du commentaire est valide
+  
     fetch("http://localhost:5000/api/add-comment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -127,21 +132,22 @@ const shareOnTwitter = (workId) => {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
+          // Met à jour l'état des commentaires
           setComments((prevComments) => ({
             ...prevComments,
             [workId]: [
               ...(prevComments[workId] || []),
               {
+                id: data.newCommentId, // ID du nouveau commentaire (si fourni par le backend)
                 userName: "Utilisateur actuel",
                 avatarUrl: "https://via.placeholder.com/40",
                 comment: commentText,
-                timestamp: new Date().toISOString(),
                 parentId: parentId,
               },
             ],
           }));
           setNewComments((prev) => ({ ...prev, [workId]: "" })); // Vider le champ texte
-          setReplyTo(null); // Réinitialise le mode "réponse"
+          setReplyTo(null); // Réinitialiser le mode "réponse"
         } else {
           console.error("Erreur lors de l'ajout du commentaire :", data.error);
         }
@@ -149,18 +155,58 @@ const shareOnTwitter = (workId) => {
       .catch((error) => console.error("Erreur réseau :", error));
   };
   
+  // Exemple d'intégration pour ajouter un champ de réponse si `replyTo` est défini
+  replyTo && (
+    <div className="reply-section">
+      <p>Vous répondez au commentaire ID : {replyTo}</p>
+      <textarea
+        placeholder="Votre réponse ici..."
+        className="form-control mb-2"
+        value={newComments?.[replyTo] || ""}
+        onChange={(e) =>
+          setNewComments((prev) => ({
+            ...prev,
+            [replyTo]: e.target.value,
+          }))
+        }
+      ></textarea>
+      <button
+        onClick={() =>
+          handleComment(selectedArtwork.id, newComments?.[replyTo], replyTo)
+        }
+        className="btn btn-success"
+      >
+        Envoyer la réponse
+      </button>
+      <button onClick={() => setReplyTo(null)} className="btn btn-secondary">
+        Annuler
+      </button>
+    </div>
+  )
+  
+  
+  
+  
 
+ 
+
+ 
   const openModal = (art) => {
     setSelectedArtwork(art);
     setIsModalOpen(true);
+    fetchComments(art.id); // Charge les commentaires pour cette œuvre
   };
-
+  
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedArtwork(null);
   };
-  const renderComments = (comments, parentId = null) =>
-    comments
+  
+  const renderComments = (comments, parentId = null) => {
+    // Vérifier que les commentaires existent
+    if (!comments || comments.length === 0) return null;
+  
+    return comments
       .filter((comment) => comment.parentId === parentId)
       .map((comment, index) => (
         <li key={index} className="d-flex align-items-start mb-3">
@@ -175,14 +221,19 @@ const shareOnTwitter = (workId) => {
             <p>{comment.comment}</p>
             <button
               className="btn btn-link p-0"
-              onClick={() => setReplyTo({ workId: selectedArtwork.id, parentId: comment.id })}
+              onClick={() => setReplyTo(comment.id)}
             >
-              {t.reply}
+              Répondre
             </button>
-            <ul>{renderComments(comments, comment.id)}</ul>
+            {/* Appeler récursivement seulement s'il y a des enfants */}
+            {comments.some((c) => c.parentId === comment.id) && (
+              <ul>{renderComments(comments, comment.id)}</ul>
+            )}
           </div>
         </li>
-         ));
+      ));
+  };
+  
   return (
     <div className="container mt-5">
       <h1 className="text-center mb-4">{t.galleryTitle}</h1>
@@ -218,6 +269,7 @@ const shareOnTwitter = (workId) => {
               <div className="card-body">
                 <h5 className="card-title">{art.title}</h5>
                 <p className="card-text">{art.description}</p>
+               
               
         
                 
@@ -229,12 +281,9 @@ const shareOnTwitter = (workId) => {
                 <div className="comments-section mt-3">
   <h6>{t.comments}:</h6>
   <ul>
-    {comments[art.id]?.map((comment, index) => (
-      <li key={index}>
-        <strong>{comment.userName}:</strong> {comment.comment}
-      </li>
-    ))}
+    {comments[art.id] ? renderComments(comments[art.id]) : <p>Aucun commentaire disponible.</p>}
   </ul>
+
   <textarea
     placeholder="Ajouter un commentaire..."
     className="form-control mb-2"
@@ -281,8 +330,10 @@ const shareOnTwitter = (workId) => {
 
       {/* Modal plein écran */}
       
-      {selectedArtwork && (
-        <Modal
+      {/* Modal plein écran */}
+{/* Modal plein écran */}
+{selectedArtwork && (
+  <Modal
     isOpen={isModalOpen}
     onRequestClose={closeModal}
     contentLabel={selectedArtwork.title}
@@ -319,6 +370,81 @@ const shareOnTwitter = (workId) => {
     </div>
   </Modal>
 )}
+
+{/* Section pour commenter en dehors du modal */}
+<div className="gallery-container mt-3">
+  {selectedArtwork && (
+    <div className="comments-section">
+      <h6>{t.comments} :</h6>
+      <ul>
+        {comments[selectedArtwork.id]?.length > 0 ? (
+          comments[selectedArtwork.id].map((comment, index) => (
+            <li key={index}>
+              <strong>{comment.userName} :</strong> {comment.comment}
+              <button
+                className="btn btn-link"
+                onClick={() => setReplyTo(comment.id)} // Définir le commentaire ciblé
+              >
+                Répondre
+              </button>
+            </li>
+          ))
+        ) : (
+          <p>Aucun commentaire pour cette œuvre.</p>
+        )}
+      </ul>
+      {replyTo && (
+        <div className="reply-section">
+          <textarea
+            placeholder="Votre réponse ici..."
+            className="form-control mb-2"
+            value={newComments?.[replyTo] || ""}
+            onChange={(e) =>
+              setNewComments((prev) => ({
+                ...prev,
+                [replyTo]: e.target.value,
+              }))
+            }
+          />
+          <button
+            onClick={() =>
+              handleComment(selectedArtwork.id, newComments?.[replyTo], replyTo)
+            }
+            className="btn btn-success"
+          >
+            Envoyer la réponse
+          </button>
+          <button
+            onClick={() => setReplyTo(null)}
+            className="btn btn-secondary"
+          >
+            Annuler
+          </button>
+        </div>
+      )}
+      <textarea
+        placeholder="Ajouter un commentaire..."
+        className="form-control mb-2"
+        value={newComments?.[selectedArtwork.id] || ""}
+        onChange={(e) =>
+          setNewComments((prev) => ({
+            ...prev,
+            [selectedArtwork.id]: e.target.value,
+          }))
+        }
+      />
+      <button
+        onClick={() =>
+          handleComment(selectedArtwork.id, newComments?.[selectedArtwork.id])
+        }
+        className="btn btn-success"
+      >
+        Ajouter
+      </button>
+    </div>
+  )}
+</div>
+
 
 
       {/* Pagination */}

@@ -63,7 +63,7 @@ const UserProfile = ({ language }) => {
         console.error("Erreur lors de la récupération des données :", error);
         setLoading(false); // Arrête le chargement même en cas d'échec
       });
-  }, []);
+  }, [t.loadingMessage]);
 
   if (loading) {
     return <p>{t.loadingMessage}</p>
