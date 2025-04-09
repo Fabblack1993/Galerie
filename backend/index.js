@@ -2,69 +2,132 @@ const express = require("express");
 const nodemailer = require("nodemailer");
 const cors = require("cors");
 const multer = require("multer");
+const mongoose = require("mongoose");
+const User = require("./models/User");
 const fs = require("fs");
 const path = require("path");
 const Stripe = require("stripe");
 const stripe = Stripe("sk_test_51RAT6WQUlwIrrCbQLXZxp9tT46DIIOCOuOzL46xMuWFM1ym9z5Oei30ygt33OKyadOPcAGovcEcjbntW94iBea9t00K7sWaL5F");
+require('dotenv').config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000", // frontend local
+  credentials: true
+}));
 app.use(express.json()); // Pour traiter les données JSON envoyées par le client
 app.use("/assets", express.static("assets"));
 app.use("/uploads", express.static("uploads"));
 let userWall = []; // Stockage des publications
 let userShop = []; // Stockage des produits
 
+
+
+
 // Simule une base de données pour les utilisateurs et les œuvres
 let orders = []; // Stockage des commandes
+// Fonction pour ajouter un utilisateur
+async function addUser(username, email, password) {
+  const existingUser = await User.findOne({ email });
 
-// Ajouter une commande
-app.post("/api/checkout", async (req, res) => {
-  const { userId, products } = req.body;
-
-  if (!userId || !products || products.length === 0) {
-    return res.status(400).json({
-      success: false,
-      message: "Les données utilisateur ou produits sont invalides.",
-    });
+  if (existingUser) {
+    console.log("Cet email existe déjà :", email);
+    return;
   }
 
-  try {
-    const lineItems = products.map((product) => ({
-      price_data: {
-        currency: "usd",
-        product_data: {
-          name: product.title,
-        },
-        unit_amount: product.price * 100,
-      },
-      quantity: 1,
-    }));
+  const newUser = new User({ username, email, password });
+  await newUser.save();
+  console.log("Utilisateur ajouté :", newUser);
+}
 
-    // Journal des données
-    console.log("Données envoyées à Stripe :", lineItems);
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: lineItems,
-      mode: "payment",
-      success_url: "http://localhost:3000/success",
-      cancel_url: "http://localhost:3000/cancel",
-    });
 
-    return res.json({
-      success: true,
-      url: session.url,
-    });
-  } catch (error) {
-    console.error("Erreur Stripe :", error.message);
-    return res.status(500).json({
-      success: false,
-      message: "Une erreur est survenue lors de la création de la session.",
-    });
+
+
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+  .then(() => console.log("✅ Connecté à MongoDB Atlas"))
+  .catch((error) => console.error("❌ Erreur de connexion à MongoDB :", error));
+
+
+  const bcrypt = require("bcrypt");
+
+  // Fonction pour hacher un mot de passe
+  async function hashPassword(password) {
+    const saltRounds = 10; // Niveau de sécurité, plus c'est élevé, plus c'est sécurisé
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    console.log("Mot de passe haché :", hashedPassword);
+    return hashedPassword;
   }
-});
+  
+  // Exemple d'utilisation
+  hashPassword("monSuperMotDePasse123");
+  
+  async function comparePasswords(plainPassword, hashedPassword) {
+    const isMatch = await bcrypt.compare(plainPassword, hashedPassword);
+    console.log("Correspondance :", isMatch);
+    return isMatch;
+  }
+  
+  // Exemple :
+  comparePasswords("monSuperMotDePasse123", "$2b$10$abcdefghijklmopqrstuvwxyz123456");
 
+  app.post("/api/checkout", async (req, res) => {
+    const { userId, products } = req.body;
+  
+    if (!userId || !products || products.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Les données utilisateur ou produits sont invalides.",
+      });
+    }
+  
+    try {
+      const lineItems = products.map((product) => {
+        // Gère les cas où product.image est un tableau ou une string
+        const imageUrl = Array.isArray(product.image)
+          ? product.image[0]
+          : product.image;
+  
+        return {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: product.title,
+              images: imageUrl ? [imageUrl] : [],
+            },
+            unit_amount: product.price * 100,
+          },
+          quantity: 1,
+        };
+      });
+  
+      console.log("Données envoyées à Stripe :", lineItems);
+  
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: lineItems,
+        mode: "payment",
+        success_url: "http://localhost:3000/success",
+        cancel_url: "http://localhost:3000/cancel",
+      });
+  
+      return res.json({
+        success: true,
+        url: session.url,
+      });
+    } catch (error) {
+      console.error("Erreur Stripe :", error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Une erreur est survenue lors de la création de la session.",
+      });
+    }
+  });
+  
+  
   
 
 const users = [
@@ -138,38 +201,55 @@ app.get("/api/user-profile", (req, res) => {
 });
 
 // Middleware d'inscription avec envoi de mail
+
+
+
+
 app.post("/api/signup", async (req, res) => {
   const { username, email, password } = req.body;
 
+  if (!username || !email || !password) {
+    return res.status(400).json({ success: false, message: "Tous les champs sont requis." });
+  }
+
   try {
-    // Configuration Nodemailer
+    // Configuration du transporteur Nodemailer
     const transporter = nodemailer.createTransport({
-      service: "Gmail",
+      service: "gmail",
       auth: {
-        user: "ndougafabienne77@gmail.com", // Remplace par ton email
-        pass: "xxfn bvqs iocd brnb ", // Remplace par ton mot de passe
+        user: process.env.EMAIL_USER,       // ton email Gmail
+        pass: process.env.EMAIL_PASS,       // mot de passe ou app password Gmail
       },
     });
 
-    const confirmationLink = `http://localhost:3000/confirm?email=${email}`;
+    // Lien de confirmation
+    const confirmationLink = `${process.env.FRONTEND_URL}/confirm?email=${encodeURIComponent(email)}`;
 
-    // Envoi du mail
+    // Envoi de l'e-mail
     await transporter.sendMail({
-      from: '"Plateforme Artistique" <ndougafabienne77@gmail.com>',
+      from: `"Plateforme Artistique" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Confirmez votre inscription",
-      html: `<h1>Bienvenue ${username} !</h1>
-             <p>Merci de vous inscrire sur notre plateforme. Cliquez sur le lien suivant pour confirmer votre compte :</p>
-             <a href="${confirmationLink}">Confirmez votre compte</a>`,
+      html: `
+        <h1>Bienvenue ${username} !</h1>
+        <p>Merci de vous inscrire sur notre plateforme.</p>
+        <p>Cliquez sur le lien suivant pour confirmer votre compte :</p>
+        <a href="${confirmationLink}">${confirmationLink}</a>
+      `,
     });
 
-    users.push({ id: Date.now(), username, email }); // Simule l'ajout dans une base de données
+    // Ajout simulé à la BDD
+    users.push({ id: Date.now(), username, email, password });
+
     res.status(200).json({ success: true, message: "E-mail de confirmation envoyé !" });
   } catch (error) {
     console.error("Erreur lors de l'envoi de l'e-mail :", error);
     res.status(500).json({ success: false, message: "Erreur interne du serveur." });
   }
 });
+
+
+
 
 // Confirmation de compte
 app.get("/api/confirm", async (req, res) => {

@@ -1,51 +1,81 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const UploadWork = () => {
+const UploadWork = ({ language }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
   });
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState("");
-  const currentUserId = 123; // Simule un utilisateur connecté
-  const navigate = useNavigate(); // Pour rediriger l'utilisateur après soumission réussie
+  const currentUserId = 123;
+  const navigate = useNavigate();
 
-  // Gestion des champs de formulaire
+  const translations = {
+    fr: {
+      pageTitle: "Uploader une Œuvre",
+      titleLabel: "Titre",
+      descriptionLabel: "Description",
+      fileLabel: "Fichier",
+      submitButton: "Soumettre",
+      successMessage: "Œuvre ajoutée avec succès !",
+      errorMessage: "Erreur lors de l'ajout de l'œuvre.",
+      fileRequired: "Veuillez sélectionner un fichier.",
+      notLoggedIn: "Vous devez être connecté pour uploader une photo !",
+      wrongType: "Seuls les fichiers JPEG, PNG ou GIF sont autorisés.",
+      tooLarge: "La taille du fichier ne doit pas dépasser 2 Mo.",
+      serverError: "Erreur de connexion au serveur.",
+    },
+    en: {
+      pageTitle: "Upload a Work",
+      titleLabel: "Title",
+      descriptionLabel: "Description",
+      fileLabel: "File",
+      submitButton: "Submit",
+      successMessage: "Work successfully added!",
+      errorMessage: "Error while uploading the work.",
+      fileRequired: "Please select a file.",
+      notLoggedIn: "You must be logged in to upload a photo!",
+      wrongType: "Only JPEG, PNG or GIF files are allowed.",
+      tooLarge: "File size must not exceed 2MB.",
+      serverError: "Server connection error.",
+    },
+  };
+
+  const t = translations[language];
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Gestion du fichier
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
       if (!allowedTypes.includes(selectedFile.type)) {
-        setMessage("Seuls les fichiers JPEG, PNG ou GIF sont autorisés.");
+        setMessage(t.wrongType);
         return;
       }
       if (selectedFile.size > 2 * 1024 * 1024) {
-        setMessage("La taille du fichier ne doit pas dépasser 2 Mo.");
+        setMessage(t.tooLarge);
         return;
       }
-      setMessage(""); // Réinitialise le message si tout est valide
+      setMessage("");
       setFile(selectedFile);
     }
   };
 
-  // Gestion de la soumission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!file) {
-      setMessage("Veuillez sélectionner un fichier.");
+      setMessage(t.fileRequired);
       return;
     }
 
     if (!currentUserId) {
-      alert("Vous devez être connecté pour uploader une photo !");
+      alert(t.notLoggedIn);
       return;
     }
 
@@ -63,26 +93,26 @@ const UploadWork = () => {
       const result = await response.json();
 
       if (result.success) {
-        setMessage("Œuvre ajoutée avec succès !");
+        setMessage(t.successMessage);
         setTimeout(() => {
-          navigate("/gallery"); // Redirige vers la galerie après 2 secondes
+          navigate("/gallery");
         }, 2000);
       } else {
-        setMessage("Erreur lors de l'ajout de l'œuvre.");
+        setMessage(t.errorMessage);
       }
     } catch (error) {
       console.error("Erreur de connexion au serveur :", error);
-      setMessage("Erreur de connexion au serveur.");
+      setMessage(t.serverError);
     }
   };
 
   return (
     <div className="container mt-5">
-      <h1 className="text-center mb-4">Uploader une Œuvre</h1>
+      <h1 className="text-center mb-4">{t.pageTitle}</h1>
       {message && <div className="alert alert-info">{message}</div>}
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label htmlFor="title" className="form-label">Titre</label>
+          <label htmlFor="title" className="form-label">{t.titleLabel}</label>
           <input
             type="text"
             id="title"
@@ -94,7 +124,7 @@ const UploadWork = () => {
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="description" className="form-label">Description</label>
+          <label htmlFor="description" className="form-label">{t.descriptionLabel}</label>
           <textarea
             id="description"
             name="description"
@@ -105,7 +135,7 @@ const UploadWork = () => {
           ></textarea>
         </div>
         <div className="mb-3">
-          <label htmlFor="file" className="form-label">Fichier</label>
+          <label htmlFor="file" className="form-label">{t.fileLabel}</label>
           <input
             type="file"
             id="file"
@@ -114,7 +144,7 @@ const UploadWork = () => {
             required
           />
         </div>
-        <button type="submit" className="btn btn-primary">Soumettre</button>
+        <button type="submit" className="btn btn-primary">{t.submitButton}</button>
       </form>
     </div>
   );

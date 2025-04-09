@@ -1,9 +1,28 @@
 import React, { useState } from "react";
 
-const Upload = () => {
+const Upload = ({ language }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
+
+  const translations = {
+    fr: {
+      pageTitle: "Uploader une œuvre",
+      titleLabel: "Titre",
+      descriptionLabel: "Description",
+      imageLabel: "Image",
+      submitButton: "Soumettre",
+    },
+    en: {
+      pageTitle: "Upload a Work",
+      titleLabel: "Title",
+      descriptionLabel: "Description",
+      imageLabel: "Image",
+      submitButton: "Submit",
+    },
+  };
+
+  const t = translations[language];
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -12,10 +31,10 @@ const Upload = () => {
 
   return (
     <div className="container mt-5">
-      <h1 className="mb-4">Uploader une œuvre</h1>
+      <h1 className="mb-4">{t.pageTitle}</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label htmlFor="title" className="form-label">Titre</label>
+          <label htmlFor="title" className="form-label">{t.titleLabel}</label>
           <input
             type="text"
             id="title"
@@ -25,7 +44,7 @@ const Upload = () => {
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="description" className="form-label">Description</label>
+          <label htmlFor="description" className="form-label">{t.descriptionLabel}</label>
           <textarea
             id="description"
             className="form-control"
@@ -34,7 +53,7 @@ const Upload = () => {
           ></textarea>
         </div>
         <div className="mb-3">
-          <label htmlFor="image" className="form-label">Image</label>
+          <label htmlFor="image" className="form-label">{t.imageLabel}</label>
           <input
             type="file"
             id="image"
@@ -42,7 +61,7 @@ const Upload = () => {
             onChange={(e) => setImage(e.target.files[0])}
           />
         </div>
-        <button type="submit" className="btn btn-primary">Soumettre</button>
+        <button type="submit" className="btn btn-primary">{t.submitButton}</button>
       </form>
     </div>
   );

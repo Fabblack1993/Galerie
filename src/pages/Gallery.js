@@ -1,82 +1,66 @@
 import React, { useState, useEffect } from "react";
-
+import Modal from "react-modal";
+import { FaFacebook, FaTwitter, FaThumbsUp } from "react-icons/fa";
 import "./Gallery.css";
-
-
-import Modal from "react-modal"; // Import du modal pour le plein écran
-import { FaFacebook, FaTwitter, FaThumbsUp } from "react-icons/fa"; // Import des icônes
 
 const Gallery = ({ language }) => {
   const [artworks, setArtworks] = useState([]);
   const [comments, setComments] = useState({});
   const [likes, setLikes] = useState({});
-  const currentUserId = 123; // Simule un utilisateur connecté
-  const limit = 6; // Limite par page
-  const [page, setPage] = useState(1); // Page actuelle
-  const [totalPages, setTotalPages] = useState(0); // Nombre total de pages
-  const [searchQuery, setSearchQuery] = useState(""); // Recherche
-  const [sortOption, setSortOption] = useState("date"); // Tri par défaut
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOption, setSortOption] = useState("date");
   const [newComments, setNewComments] = useState({});
   const [replyTo, setReplyTo] = useState(null);
-
-  
-
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedArtwork, setSelectedArtwork] = useState(null); // Œuv
-  // // Fonction pour partager sur Facebook
-const shareOnFacebook = (workId) => {
-  const url = `http://localhost:3000/gallery?workId=${workId}`;
-  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank");
-};
+  const [selectedArtwork, setSelectedArtwork] = useState(null);
 
-// Fonction pour partager sur Twitter
-const shareOnTwitter = (workId) => {
-  const url = `http://localhost:3000/gallery?workId=${workId}`;
-  const text = "Découvrez cette incroyable œuvre d'art !";
-  window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, "_blank");
-};
+  const limit = 6;
 
-  // Traductions pour les textes
+  // Utilisateur connecté (simulé ici)
+  const currentUser = {
+    id: 123,
+    name: "John Doe",
+    avatar: "https://via.placeholder.com/40"
+  };
+
   const translations = {
     fr: {
       galleryTitle: "Galerie",
-      searchPlaceholder: "Rechercher une œuvre par titre, artiste ou catégorie...",
+      searchPlaceholder: "Rechercher une œuvre...",
       sortByDate: "Trier par : Date",
-      sortByLikes: "Trier par : Popularité (Likes)",
+      sortByLikes: "Trier par : Likes",
       like: "J'aime",
       shareOnFacebook: "Partager sur Facebook",
       shareOnTwitter: "Partager sur Twitter",
-      description: "Description",
-      likes: "J'aime",
       comments: "Commentaires",
+      add: "Ajouter",
       close: "Fermer",
       previous: "Précédent",
       next: "Suivant",
       page: "Page",
-      of: "sur",
-      Add: "Ajouter",
+      of: "sur"
     },
     en: {
       galleryTitle: "Gallery",
-      searchPlaceholder: "Search for an artwork by title, artist, or category...",
+      searchPlaceholder: "Search artworks...",
       sortByDate: "Sort by: Date",
-      sortByLikes: "Sort by: Popularity (Likes)",
+      sortByLikes: "Sort by: Likes",
       like: "Like",
       shareOnFacebook: "Share on Facebook",
       shareOnTwitter: "Share on Twitter",
-      description: "Description",
-      likes: "Likes",
       comments: "Comments",
+      add: "Add",
       close: "Close",
       previous: "Previous",
       next: "Next",
       page: "Page",
-      of: "of",
-      Add:"Add",
-    },
+      of: "of"
+    }
   };
 
-  const t = translations[language]; // Shortcut for current translations
+  const t = translations[language];
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/gallery?page=${page}&limit=${limit}&search=${searchQuery}&sort=${sortOption}`)
@@ -85,30 +69,22 @@ const shareOnTwitter = (workId) => {
         setArtworks(data.works);
         setTotalPages(Math.ceil(data.total / limit));
       })
-      .catch((error) => console.error("Erreur lors de la récupération :", error));
+      .catch((err) => console.error("Erreur chargement galerie :", err));
   }, [page, searchQuery, sortOption]);
 
   const fetchComments = (workId) => {
     fetch(`http://localhost:5000/api/get-comments/${workId}`)
       .then((res) => res.json())
       .then((data) => {
-        setComments((prevComments) => ({
-          ...prevComments,
-          [workId]: data.comments,
-        }));
-      })
-      .catch((error) => console.error("Erreur lors de la récupération des commentaires :", error));
+        setComments((prev) => ({ ...prev, [workId]: data.comments }));
+      });
   };
-  
 
   const fetchLikes = (workId) => {
     fetch(`http://localhost:5000/api/get-likes/${workId}`)
       .then((res) => res.json())
       .then((data) => {
-        setLikes((prevLikes) => ({
-          ...prevLikes,
-          [workId]: data.totalLikes,
-        }));
+        setLikes((prev) => ({ ...prev, [workId]: data.totalLikes }));
       });
   };
 
@@ -116,129 +92,88 @@ const shareOnTwitter = (workId) => {
     fetch("http://localhost:5000/api/like-work", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ workId, userId: currentUserId }),
-    }).then(() => {
-      fetchLikes(workId);
-    });
+      body: JSON.stringify({ workId, userId: currentUser.id })
+    }).then(() => fetchLikes(workId));
   };
+
   const handleComment = (workId, commentText, parentId = null) => {
-    if (!commentText || !workId) return; // Vérifier que le texte du commentaire est valide
-  
+    if (!commentText.trim()) return;
+
     fetch("http://localhost:5000/api/add-comment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ workId, userId: currentUserId, comment: commentText, parentId }),
+      body: JSON.stringify({
+        workId,
+        userId: currentUser.id,
+        comment: commentText,
+        parentId
+      })
     })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          // Met à jour l'état des commentaires
-          setComments((prevComments) => ({
-            ...prevComments,
-            [workId]: [
-              ...(prevComments[workId] || []),
-              {
-                id: data.newCommentId, // ID du nouveau commentaire (si fourni par le backend)
-                userName: "Utilisateur actuel",
-                avatarUrl: "https://via.placeholder.com/40",
-                comment: commentText,
-                parentId: parentId,
-              },
-            ],
-          }));
-          setNewComments((prev) => ({ ...prev, [workId]: "" })); // Vider le champ texte
-          setReplyTo(null); // Réinitialiser le mode "réponse"
-        } else {
-          console.error("Erreur lors de l'ajout du commentaire :", data.error);
-        }
-      })
-      .catch((error) => console.error("Erreur réseau :", error));
-  };
-  
-  // Exemple d'intégration pour ajouter un champ de réponse si `replyTo` est défini
-  replyTo && (
-    <div className="reply-section">
-      <p>Vous répondez au commentaire ID : {replyTo}</p>
-      <textarea
-        placeholder="Votre réponse ici..."
-        className="form-control mb-2"
-        value={newComments?.[replyTo] || ""}
-        onChange={(e) =>
-          setNewComments((prev) => ({
+          setComments((prev) => ({
             ...prev,
-            [replyTo]: e.target.value,
-          }))
+            [workId]: [
+              ...(prev[workId] || []),
+              {
+                id: data.newCommentId,
+                userName: currentUser.name,
+                avatarUrl: currentUser.avatar,
+                comment: commentText,
+                parentId: parentId
+              }
+            ]
+          }));
+          setNewComments((prev) => ({ ...prev, [workId]: "" }));
+          setReplyTo(null);
         }
-      ></textarea>
-      <button
-        onClick={() =>
-          handleComment(selectedArtwork.id, newComments?.[replyTo], replyTo)
-        }
-        className="btn btn-success"
-      >
-        Envoyer la réponse
-      </button>
-      <button onClick={() => setReplyTo(null)} className="btn btn-secondary">
-        Annuler
-      </button>
-    </div>
-  )
-  
-  
-  
-  
+      });
+  };
 
- 
-
- 
   const openModal = (art) => {
     setSelectedArtwork(art);
     setIsModalOpen(true);
-    fetchComments(art.id); // Charge les commentaires pour cette œuvre
+    fetchComments(art.id);
   };
-  
+
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedArtwork(null);
+    setReplyTo(null);
   };
-  
+
   const renderComments = (comments, parentId = null) => {
-    // Vérifier que les commentaires existent
-    if (!comments || comments.length === 0) return null;
-  
+    if (!comments) return null;
+
     return comments
-      .filter((comment) => comment.parentId === parentId)
-      .map((comment, index) => (
-        <li key={index} className="d-flex align-items-start mb-3">
+      .filter((c) => c.parentId === parentId)
+      .map((c, i) => (
+        <li key={i} className="d-flex mb-3">
           <img
-            src={comment.avatarUrl || "https://via.placeholder.com/40"}
-            alt={comment.userName}
+            src={c.avatarUrl}
+            alt={c.userName}
             className="rounded-circle me-2"
-            style={{ width: "40px", height: "40px" }}
+            style={{ width: 40, height: 40 }}
           />
           <div>
-            <strong>{comment.userName}</strong>
-            <p>{comment.comment}</p>
-            <button
-              className="btn btn-link p-0"
-              onClick={() => setReplyTo(comment.id)}
-            >
+            <strong>{c.userName}</strong>
+            <p>{c.comment}</p>
+            <button className="btn btn-link p-0" onClick={() => setReplyTo(c.id)}>
               Répondre
             </button>
-            {/* Appeler récursivement seulement s'il y a des enfants */}
-            {comments.some((c) => c.parentId === comment.id) && (
-              <ul>{renderComments(comments, comment.id)}</ul>
+            {comments.some((x) => x.parentId === c.id) && (
+              <ul>{renderComments(comments, c.id)}</ul>
             )}
           </div>
         </li>
       ));
   };
-  
+
   return (
     <div className="container mt-5">
       <h1 className="text-center mb-4">{t.galleryTitle}</h1>
 
-      {/* Barre de recherche et filtres */}
       <div className="mb-4">
         <input
           type="text"
@@ -257,7 +192,7 @@ const shareOnTwitter = (workId) => {
         </select>
       </div>
 
-      <div className="row mt-4">
+      <div className="row">
         {artworks.map((art) => (
           <div key={art.id} className="col-md-6 mb-4">
             <div
@@ -269,189 +204,138 @@ const shareOnTwitter = (workId) => {
               <div className="card-body">
                 <h5 className="card-title">{art.title}</h5>
                 <p className="card-text">{art.description}</p>
-               
-              
-        
-                
-                <button onClick={() => handleLike(art.id)} className="btn btn-primary">
-                
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLike(art.id);
+                  }}
+                  className="btn btn-primary"
+                >
                   <FaThumbsUp /> {t.like} ({likes[art.id] || 0})
                 </button>
-           
-                <div className="comments-section mt-3">
-  <h6>{t.comments}:</h6>
-  <ul>
-    {comments[art.id] ? renderComments(comments[art.id]) : <p>Aucun commentaire disponible.</p>}
-  </ul>
-
-  <textarea
-    placeholder="Ajouter un commentaire..."
-    className="form-control mb-2"
-    value={newComments?.[art.id] || ""}
-    onChange={(e) =>
-      setNewComments((prev) => ({
-        ...prev,
-        [art.id]: e.target.value,
-      }))
-    }
-  ></textarea>
-  <button
-    onClick={() => handleComment(art.id, newComments?.[art.id])}
-    className="btn btn-success"
-  >
-    Ajouter
-  </button>
-</div>
- 
-
 
                 <div className="social-share mt-3">
                   <button
-                    onClick={() => shareOnFacebook(art.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(
+                        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                          `http://localhost:3000/gallery?workId=${art.id}`
+                        )}`,
+                        "_blank"
+                      );
+                    }}
                     className="btn btn-info me-2"
-                    title={t.shareOnFacebook}
                   >
                     <FaFacebook /> {t.shareOnFacebook}
                   </button>
                   <button
-                    onClick={() => shareOnTwitter(art.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(
+                        `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+                          `http://localhost:3000/gallery?workId=${art.id}`
+                        )}&text=Découvrez cette œuvre !`,
+                        "_blank"
+                      );
+                    }}
                     className="btn btn-info"
-                    title={t.shareOnTwitter}
                   >
                     <FaTwitter /> {t.shareOnTwitter}
                   </button>
                 </div>
-                
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Modal plein écran */}
-      
-      {/* Modal plein écran */}
-{/* Modal plein écran */}
-{selectedArtwork && (
-  <Modal
-    isOpen={isModalOpen}
-    onRequestClose={closeModal}
-    contentLabel={selectedArtwork.title}
-    style={{
-      overlay: {
-        backgroundColor: "rgba(0, 0, 0, 0.75)",
-        zIndex: 1000,
-      },
-      content: {
-        top: "50%",
-        left: "50%",
-        right: "auto",
-        bottom: "auto",
-        transform: "translate(-50%, -50%)",
-        padding: "20px",
-        background: "#fff",
-        border: "none",
-        maxWidth: "90%",
-        maxHeight: "90vh",
-        overflow: "auto",
-      },
-    }}
-  >
-    <div>
-      <h2>{selectedArtwork.title}</h2>
-      <img
-        src={selectedArtwork.filePath}
-        alt={selectedArtwork.title}
-        style={{ width: "100%", height: "auto", display: "block", margin: "auto" }}
-      />
-      <button onClick={closeModal} style={{ marginTop: "10px" }}>
-        Fermer
-      </button>
-    </div>
-  </Modal>
-)}
-
-{/* Section pour commenter en dehors du modal */}
-<div className="gallery-container mt-3">
-  {selectedArtwork && (
-    <div className="comments-section">
-      <h6>{t.comments} :</h6>
-      <ul>
-        {comments[selectedArtwork.id]?.length > 0 ? (
-          comments[selectedArtwork.id].map((comment, index) => (
-            <li key={index}>
-              <strong>{comment.userName} :</strong> {comment.comment}
-              <button
-                className="btn btn-link"
-                onClick={() => setReplyTo(comment.id)} // Définir le commentaire ciblé
-              >
-                Répondre
-              </button>
-            </li>
-          ))
-        ) : (
-          <p>Aucun commentaire pour cette œuvre.</p>
-        )}
-      </ul>
-      {replyTo && (
-        <div className="reply-section">
-          <textarea
-            placeholder="Votre réponse ici..."
-            className="form-control mb-2"
-            value={newComments?.[replyTo] || ""}
-            onChange={(e) =>
-              setNewComments((prev) => ({
-                ...prev,
-                [replyTo]: e.target.value,
-              }))
+      {selectedArtwork && (
+        <Modal
+          isOpen={isModalOpen}
+          onRequestClose={closeModal}
+          contentLabel={selectedArtwork.title}
+          style={{
+            overlay: {
+              backgroundColor: "rgba(0, 0, 0, 0.75)",
+              zIndex: 1000
+            },
+            content: {
+              maxWidth: "90%",
+              maxHeight: "90vh",
+              overflow: "auto",
+              margin: "auto",
+              padding: 20
             }
+          }}
+        >
+          <h2>{selectedArtwork.title}</h2>
+          <img
+            src={selectedArtwork.filePath}
+            alt={selectedArtwork.title}
+            style={{ width: "100%", height: "auto" }}
           />
-          <button
-            onClick={() =>
-              handleComment(selectedArtwork.id, newComments?.[replyTo], replyTo)
-            }
-            className="btn btn-success"
-          >
-            Envoyer la réponse
+          <div className="comments-section mt-4">
+            <h6>{t.comments}:</h6>
+            <ul>{renderComments(comments[selectedArtwork.id])}</ul>
+
+            {replyTo && (
+              <div className="reply-section">
+                <textarea
+                  className="form-control mb-2"
+                  placeholder="Votre réponse..."
+                  value={newComments[replyTo] || ""}
+                  onChange={(e) =>
+                    setNewComments((prev) => ({
+                      ...prev,
+                      [replyTo]: e.target.value
+                    }))
+                  }
+                />
+                <button
+                  className="btn btn-success me-2"
+                  onClick={() =>
+                    handleComment(selectedArtwork.id, newComments[replyTo], replyTo)
+                  }
+                >
+                  Envoyer
+                </button>
+                <button className="btn btn-secondary" onClick={() => setReplyTo(null)}>
+                  Annuler
+                </button>
+              </div>
+            )}
+
+            <textarea
+              className="form-control mb-2"
+              placeholder="Ajouter un commentaire..."
+              value={newComments[selectedArtwork.id] || ""}
+              onChange={(e) =>
+                setNewComments((prev) => ({
+                  ...prev,
+                  [selectedArtwork.id]: e.target.value
+                }))
+              }
+            />
+            <button
+              className="btn btn-success"
+              onClick={() =>
+                handleComment(selectedArtwork.id, newComments[selectedArtwork.id])
+              }
+            >
+              {t.add}
+            </button>
+          </div>
+          <button onClick={closeModal} className="btn btn-secondary mt-3">
+            {t.close}
           </button>
-          <button
-            onClick={() => setReplyTo(null)}
-            className="btn btn-secondary"
-          >
-            Annuler
-          </button>
-        </div>
+        </Modal>
       )}
-      <textarea
-        placeholder="Ajouter un commentaire..."
-        className="form-control mb-2"
-        value={newComments?.[selectedArtwork.id] || ""}
-        onChange={(e) =>
-          setNewComments((prev) => ({
-            ...prev,
-            [selectedArtwork.id]: e.target.value,
-          }))
-        }
-      />
-      <button
-        onClick={() =>
-          handleComment(selectedArtwork.id, newComments?.[selectedArtwork.id])
-        }
-        className="btn btn-success"
-      >
-        Ajouter
-      </button>
-    </div>
-  )}
-</div>
 
-
-
-      {/* Pagination */}
       <div className="d-flex justify-content-center mt-4">
         <button
           className="btn btn-primary me-2"
-          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+          onClick={() => setPage((p) => Math.max(p - 1, 1))}
           disabled={page === 1}
         >
           {t.previous}
@@ -461,13 +345,12 @@ const shareOnTwitter = (workId) => {
         </span>
         <button
           className="btn btn-primary ms-2"
-          onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+          onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
           disabled={page === totalPages}
         >
           {t.next}
         </button>
-      
-    </div>
+      </div>
     </div>
   );
 };

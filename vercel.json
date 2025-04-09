@@ -8,11 +8,9 @@
         "src": "public/index.html",
         "use": "@vercel/static-build",
         "config": {
-          "distDir": "public"
+          "distDir": "build"
         }
       }
-      
-      
     ],
     "routes": [
       {

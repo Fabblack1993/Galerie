@@ -54,7 +54,7 @@ const UserShop = ({ userId, language }) => {
         return res.json();
       })
       .then((data) => {
-        console.log("Produits récupérés :", data.products); // Vérifie les produits récupérés
+        console.log("Produits récupérés :", data.products);
         setProducts(data.products);
         setLoading(false);
       })
@@ -74,13 +74,13 @@ const UserShop = ({ userId, language }) => {
       alert(t.emptyCartMessage);
       return;
     }
-  
-    console.log("Produits dans le panier :", cart); // Vérifie les données du panier
-  
+
+    console.log("Produits dans le panier :", cart);
+
     fetch("http://localhost:5000/api/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, products: cart }), // Envoi des données au backend
+      body: JSON.stringify({ userId, products: cart }),
     })
       .then((res) => {
         if (!res.ok) {
@@ -89,9 +89,9 @@ const UserShop = ({ userId, language }) => {
         return res.json();
       })
       .then((data) => {
-        console.log("Réponse du backend :", data); // Vérifie la réponse du backend
+        console.log("Réponse du backend :", data);
         if (data.success) {
-          window.location.href = data.url; // Redirige vers Stripe si tout est OK
+          window.location.href = data.url;
         } else {
           console.error("Erreur backend :", data.message);
           alert("Une erreur est survenue lors de la commande.");
@@ -173,7 +173,11 @@ const UserShop = ({ userId, language }) => {
           {products.map((product) => (
             <div key={product.id} className="product-item">
               <img 
-                src={product.image || "http://localhost:5000/uploads/default-image.png"} 
+                src={
+                  Array.isArray(product.image)
+                    ? product.image[0]
+                    : product.image || "http://localhost:5000/uploads/default-image.png"
+                } 
                 alt={product.title} 
                 className="product-image" 
               />
@@ -211,3 +215,4 @@ const UserShop = ({ userId, language }) => {
 };
 
 export default UserShop;
+
