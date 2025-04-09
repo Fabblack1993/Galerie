@@ -9,6 +9,8 @@ const path = require("path");
 const Stripe = require("stripe");
 const stripe = Stripe("sk_test_51RAT6WQUlwIrrCbQLXZxp9tT46DIIOCOuOzL46xMuWFM1ym9z5Oei30ygt33OKyadOPcAGovcEcjbntW94iBea9t00K7sWaL5F");
 require('dotenv').config();
+const bcrypt = require('bcryptjs');
+
 
 const app = express();
 app.use(cors({
@@ -52,7 +54,7 @@ mongoose.connect(process.env.MONGO_URI, {
   .catch((error) => console.error("❌ Erreur de connexion à MongoDB :", error));
 
 
-  const bcrypt = require("bcrypt");
+  const bcrypt = require("bcryptjs");
 
   // Fonction pour hacher un mot de passe
   async function hashPassword(password) {
