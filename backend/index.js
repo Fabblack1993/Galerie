@@ -54,7 +54,7 @@ mongoose.connect(process.env.MONGO_URI, {
   .catch((error) => console.error("❌ Erreur de connexion à MongoDB :", error));
 
 
-  const bcrypt = require("bcryptjs");
+  
 
   // Fonction pour hacher un mot de passe
   async function hashPassword(password) {
